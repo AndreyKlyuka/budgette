@@ -1,26 +1,40 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { PrismaService } from '@budgette/api/data-access-db';
+import { User } from '@prisma/client';
+import { genSaltSync, hashSync } from 'bcrypt';
 
 @Injectable()
 export class UserService {
-    create(createUserDto: CreateUserDto) {
-        return 'This action adds a new user';
+    //TODO fix forbidden non-null assertion on 12 and 15 lines
+    constructor(private readonly prismaService: PrismaService) {}
+    public create(user: Partial<User>) {
+        const hashedPassword: string = this.hashPassword(user.password!);
+        return this.prismaService.user.create({
+            data: {
+                email: user.email!,
+                password: hashedPassword,
+                roles: ['USER'],
+            },
+        });
     }
 
-    findAll() {
-        return `This action returns all user`;
+    public findOne(idOrEmail: string) {
+        return this.prismaService.user.findFirst({
+            where: {
+                OR: [{ id: idOrEmail }, { email: idOrEmail }],
+            },
+        });
     }
 
-    findOne(id: number) {
-        return `This action returns a #${id} user`;
+    public delete(id: string) {
+        return this.prismaService.user.delete({
+            where: {
+                id: id,
+            },
+        });
     }
 
-    update(id: number, updateUserDto: UpdateUserDto) {
-        return `This action updates a #${id} user`;
-    }
-
-    remove(id: number) {
-        return `This action removes a #${id} user`;
+    private hashPassword(password: string): string {
+        return hashSync(password, genSaltSync(10));
     }
 }
