@@ -7,7 +7,7 @@
         "start:web": "nx serve web",
         "docker:dev:up": "docker-compose -f ./docker/postgres/docker-compose.yml up -d",
         "docker:dev:down": "docker-compose -f ./docker/postgres/docker-compose.yml down",
-        "db:migrate:dev": "npx env-cmd -f .env npx prisma migrate dev",
+        "db:migrate:dev": "npx prisma migrate dev",
         "db:studio": "npx prisma studio"
     },
     "private": true,
